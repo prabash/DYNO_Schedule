@@ -54,7 +54,7 @@ public class ShopOrderAgent extends Agent
      */
     protected void takeDown()
     {
-
+          System.out.println("test");
     }
 
     /**
