@@ -15,7 +15,8 @@ import java.util.List;
  */
 public class WorkCenterDataManager
 {
-    private DataGetMethod getMethod;
+    private final DataGetMethod getMethod;
+    private static List<WorkCenterModel> workCenterDetails;
 
     public WorkCenterDataManager(DataGetMethod getMethod)
     {
@@ -32,13 +33,10 @@ public class WorkCenterDataManager
             }
             case Excel:
             {
-                return getWorkCenterDetailsFromExcel();
-            }
-            default:
-            {
-                return null;
+                workCenterDetails = getWorkCenterDetailsFromExcel();
             }
         }
+        return workCenterDetails;
     }
     
     private List<WorkCenterModel> getWorkCenterDetailsFromExcel()

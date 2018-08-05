@@ -18,6 +18,7 @@ public class ShopOrderOperationModel
     private int operationId;
     private int operationNo;
     private String workCenterNo;
+    private String workCenterType;
     private String operationDescription;
     private int operationSequence;
     private double workCenterRuntime;
@@ -251,5 +252,21 @@ public class ShopOrderOperationModel
     public void setOperationId(int operationId)
     {
         this.operationId = operationId;
+    }
+
+    /**
+     * @return the workCenterType
+     */
+    public String getWorkCenterType()
+    {
+        return workCenterType;
+    }
+
+    /**
+     * @param workCenterType the workCenterType to set
+     */
+    public void setWorkCenterType(String workCenterType)
+    {
+        this.workCenterType = workCenterType;
     }
 }

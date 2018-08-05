@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
  */
 public class ShopOrderDataManager
 {
-
-    private DataGetMethod getMethod;
+    private final DataGetMethod getMethod;
+    private static List<ShopOrderModel> shopOrderDetails;
 
     public ShopOrderDataManager(DataGetMethod getMethod)
     {
@@ -35,13 +35,10 @@ public class ShopOrderDataManager
             }
             case Excel:
             {
-                return getShopOrderDetailsFromExcel();
-            }
-            default:
-            {
-                return null;
+                shopOrderDetails = getShopOrderDetailsFromExcel();
             }
         }
+        return shopOrderDetails;
     }
 
     private List<ShopOrderModel> getShopOrderDetailsFromExcel()

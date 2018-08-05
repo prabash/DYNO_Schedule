@@ -5,6 +5,7 @@
  */
 package dyno.schedule.data;
 
+import dyno.schedule.utils.DateTimeUtil;
 import dyno.schedule.enums.OperationStatus;
 import dyno.schedule.enums.ShopOrderPriority;
 import dyno.schedule.enums.ShopOrderScheduleStatus;
@@ -17,7 +18,6 @@ import dyno.schedule.models.WorkCenterOpAllocModel;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,20 +89,20 @@ public class ExcelManager
             {
                 continue;
             }
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            DateFormat dateFormat = DateTimeUtil.getDefaultSimpleDateFormat();
             ShopOrderModel shopOrder = new ShopOrderModel();
 
             int i = -1;
 
             shopOrder.setOrderNo(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrder.setDescription(dataFormatter.formatCellValue(row.getCell(++i)));
-            shopOrder.setCreatedDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrder.setCreatedDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
             shopOrder.setPartNo(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrder.setStructureRevision(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrder.setRoutingRevision(dataFormatter.formatCellValue(row.getCell(++i)));
-            shopOrder.setRequiredDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrder.setStartDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrder.setFinishDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrder.setRequiredDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrder.setStartDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrder.setFinishDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
             shopOrder.setSchedulingDirection(ShopOrderSchedulingDirection.valueOf(dataFormatter.formatCellValue(row.getCell(++i))));
             shopOrder.setCustomerNo(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrder.setSchedulingStatus(ShopOrderScheduleStatus.valueOf(dataFormatter.formatCellValue(row.getCell(++i))));
@@ -128,7 +128,7 @@ public class ExcelManager
             {
                 continue;
             }
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            DateFormat dateFormat = DateTimeUtil.getDefaultSimpleDateFormat();
             ShopOrderOperationModel shopOrderOperation = new ShopOrderOperationModel();
             int i = -1;
 
@@ -139,11 +139,12 @@ public class ExcelManager
             shopOrderOperation.setOperationSequence(row.getCell(++i) == null ? null : Integer.parseInt(dataFormatter.formatCellValue(row.getCell(i))));
             shopOrderOperation.setWorkCenterRuntime(row.getCell(++i) == null ? null : Double.parseDouble(dataFormatter.formatCellValue(row.getCell(i))));
             shopOrderOperation.setLaborRunTime(row.getCell(++i) == null ? null : Double.parseDouble(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrderOperation.setOpStartDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrderOperation.setOpStartTime(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrderOperation.setOpFinishDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
-            shopOrderOperation.setOpFinishTime(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrderOperation.setOpStartDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrderOperation.setOpStartTime(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrderOperation.setOpFinishDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            shopOrderOperation.setOpFinishTime(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
             shopOrderOperation.setQuantity(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(++i))));
+            shopOrderOperation.setWorkCenterType(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrderOperation.setWorkCenterNo(dataFormatter.formatCellValue(row.getCell(++i)));
             shopOrderOperation.setOperationStatus(OperationStatus.valueOf(dataFormatter.formatCellValue(row.getCell(++i))));
 
@@ -195,22 +196,22 @@ public class ExcelManager
             {
                 continue;
             }
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            DateFormat dateFormat = DateTimeUtil.getDefaultSimpleDateFormat();
             WorkCenterOpAllocModel workCenterOpAllocation = new WorkCenterOpAllocModel();
             int i = -1;
 
             workCenterOpAllocation.setWorkCenterNo(dataFormatter.formatCellValue(row.getCell(++i)));
-            workCenterOpAllocation.setOperationDate(row.getCell(++i) == null ? null : df.parse(dataFormatter.formatCellValue(row.getCell(i))));
+            workCenterOpAllocation.setOperationDate(row.getCell(++i) == null ? null : dateFormat.parse(dataFormatter.formatCellValue(row.getCell(i))));
             workCenterOpAllocation.setTimeBlockAllocation(new HashMap<String, Integer>());
             int timeBlockId = 1;
             for (int j = ++i; j < i + noOfTimeBlocks; j++)
             {
                 if (row.getCell(j) != null)
                 {
-                    workCenterOpAllocation.AddToTimeBlockAllocation("TimeBlock" + timeBlockId, Integer.parseInt(dataFormatter.formatCellValue(row.getCell(j))));
+                    workCenterOpAllocation.AddToTimeBlockAllocation("TB" + timeBlockId, Integer.parseInt(dataFormatter.formatCellValue(row.getCell(j))));
                 } else
                 {
-                    workCenterOpAllocation.AddToTimeBlockAllocation("TimeBlock" + timeBlockId, 0);
+                    workCenterOpAllocation.AddToTimeBlockAllocation("TB" + timeBlockId, 0);
                 }
                 timeBlockId++;
             }
