@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -74,4 +75,12 @@ public class DateTimeUtil
         return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
+    public static Date ConcatenateDateTime(Date date, Date time)
+    {
+        String startingDate = getDefaultSimpleDateFormat().format(date);
+        String startingTime = getDefaultSimpleTimeFormat().format(time);
+        LocalDate datePart = LocalDate.parse(startingDate, DateTimeUtil.getDefaultDateFormat());
+        LocalTime timePart = LocalTime.parse(startingTime);
+        return DateTimeUtil.asDate(LocalDateTime.of(datePart, timePart));
+    }
 }

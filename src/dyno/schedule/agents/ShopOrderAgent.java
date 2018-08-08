@@ -35,7 +35,7 @@ public class ShopOrderAgent extends Agent
     protected ShopOrderModel shopOrder;
 
     // The target date that the operation should be started (FS) or Ended (BS)
-    private Date targetOperationDate;
+    private Date targetOperationDate = null;
     // The list of known workcenter agents
     private AID[] workCenterAgents;
 
@@ -57,7 +57,15 @@ public class ShopOrderAgent extends Agent
             shopOrder = (ShopOrderModel) args[0];
             for (ShopOrderOperationModel operation : shopOrder.getOperations())
             {
-                targetOperationDate = (Date) shopOrder.getCreatedDate();
+                try
+                {
+                    // if the targetOperationDate is null (initially), set the SO created date as the startdate and concatenate with 8.00AM as the starting time
+                    // if the targetOperationDate is available use it as it is (since it will already have the time portion available)
+                    targetOperationDate = targetOperationDate == null ? DateTimeUtil.ConcatenateDateTime(shopOrder.getCreatedDate(), DateTimeUtil.getDefaultSimpleTimeFormat().parse("08:00:00")) : targetOperationDate;
+                } catch (ParseException ex)
+                {
+                    Logger.getLogger(ShopOrderAgent.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 System.out.println("Target operation date is " + targetOperationDate);
 
                 // Add a TickerBehaviour that schedules a request to seller agents every minute
@@ -102,8 +110,8 @@ public class ShopOrderAgent extends Agent
         {
             System.out.println("Error with the Shop Order arguments");
         }
-        //Add the behaviours
-        addBehaviour(new SendMessage(this));
+//        //Add the behaviours
+//        addBehaviour(new SendMessage(this));
 
         System.out.println("the Shop Order Agent " + this.getLocalName() + " is started");
     }
@@ -202,7 +210,7 @@ public class ShopOrderAgent extends Agent
                     {
                         cfpMessage.addReceiver(workCenterAgents[i]);
                     }
-                    cfpMessage.setContent(dateFormat.format(targetOperationDate));
+                    cfpMessage.setContent(dateTimeFormat.format(targetOperationDate));
                     cfpMessage.setConversationId(converstaionId);
                     cfpMessage.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value (can be something with the Shop Order No + operation No. and time)
                     myAgent.send(cfpMessage);
@@ -226,13 +234,18 @@ public class ShopOrderAgent extends Agent
                             {
                                 // This is an offer, recieved with the date and the time
                                 offeredDate = dateTimeFormat.parse(reply.getContent());
+                                
+                                System.out.println("++++++ offeredDate : " + offeredDate);
+                                System.out.println("++++++ targetOperationDate : " + targetOperationDate);
+                                System.out.println("++++++ bestOfferedDate : " + bestOfferedDate);
 
                                 // if forward scheduling the offered date should be the earliest date/time that comes on or after the target date
-                                if (bestWorkCenter == null || (offeredDate.after(targetOperationDate) && offeredDate.before(bestOfferedDate)))
+                                if (bestWorkCenter == null || ((offeredDate.equals(targetOperationDate) || offeredDate.after(targetOperationDate)) && offeredDate.before(bestOfferedDate)))
                                 {
                                     // This is the best offer at present
                                     bestOfferedDate = offeredDate;
                                     bestWorkCenter = reply.getSender();
+                                    System.out.println("Current best offered time : " + bestOfferedDate + " by Work Center Agent : " + bestWorkCenter);
                                 }
                             } catch (ParseException ex)
                             {
@@ -244,6 +257,7 @@ public class ShopOrderAgent extends Agent
                         {
                             // We received all replies
                             step = 2;
+                            System.out.println("++++++ RECEIVED ALL OFFERES! ++++++++");
                         }
                     } else
                     {
@@ -261,6 +275,10 @@ public class ShopOrderAgent extends Agent
                     // Prepare the template to get the purchase order reply
                     msgTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId(converstaionId),
                             MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    
+                    // after accepting the offer, the new targetOperationDate should be the accepted date, for the next operation to begin
+                    targetOperationDate = bestOfferedDate;
+                    
                     step = 3;
                     break;
                 case 3:

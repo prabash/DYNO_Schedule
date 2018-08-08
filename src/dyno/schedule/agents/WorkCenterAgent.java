@@ -9,6 +9,7 @@ import dyno.schedule.data.WorkCenterOpAllocDataManager;
 import dyno.schedule.models.WorkCenterModel;
 import dyno.schedule.utils.DateTimeUtil;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
@@ -29,9 +30,10 @@ import java.util.logging.Logger;
  */
 public class WorkCenterAgent extends Agent
 {
+
     protected WorkCenterModel workCenter;
     // the target date requested by the shop order agent for a particular operation
-    Date targetDate;
+    Date requestedOpDate;
     // the best date and timeblock available to the work center agent
     Date bestOfferedDate;
 
@@ -97,6 +99,7 @@ public class WorkCenterAgent extends Agent
      */
     public class ReceiveMessage extends SimpleBehaviour
     {
+
         /**
          * When an agent choose to communicate with others agents in order to
          * reach a precise decision, it tries to form a coalition. This
@@ -144,39 +147,43 @@ public class WorkCenterAgent extends Agent
      */
     private class BOfferAvailableDate extends CyclicBehaviour
     {
+
         DateFormat dateFormat = DateTimeUtil.getDefaultSimpleDateFormat();
         DateFormat dateTimeFormat = DateTimeUtil.getDefaultSimpleDateTimeFormat();
+        
         public void action()
         {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null)
             {
-                try {
+                try
+                {
                     // CFP Message received. Process it
-                    targetDate = dateFormat.parse(msg.getContent());
+                    requestedOpDate = dateTimeFormat.parse(msg.getContent());
                     ACLMessage reply = msg.createReply();
-                    
+
                     // you should get the date related to the work center that is the earliest date after the target date
-                    bestOfferedDate = WorkCenterOpAllocDataManager.getBestDateTimeOffer(workCenter.getWorkCenterNo(), targetDate);
-                    
+                    bestOfferedDate = WorkCenterOpAllocDataManager.getBestDateTimeOffer(workCenter.getWorkCenterNo(), requestedOpDate);
+
                     if (bestOfferedDate != null)
                     {
                         // reply with the earliest available date/timeblock that comes after the target date
                         reply.setPerformative(ACLMessage.PROPOSE);
-                        
+
                         // offer should be included with the time as well, therefore the dateTimeFormat is used
                         reply.setContent(dateTimeFormat.format(bestOfferedDate));
                     }
                     myAgent.send(reply);
-                } catch (ParseException ex) {
+                } catch (ParseException ex)
+                {
                     Logger.getLogger(WorkCenterAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else
             {
                 block();
             }
-        }
+        } 
     }  // End of inner class BOfferAvailableDate
 
     /**
@@ -188,7 +195,6 @@ public class WorkCenterAgent extends Agent
      */
     private class BAssignOperationToWorkCenter extends CyclicBehaviour
     {
-
         public void action()
         {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
