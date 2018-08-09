@@ -8,8 +8,10 @@ package dyno.schedule.data;
 import dyno.schedule.utils.DateTimeUtil;
 import dyno.schedule.enums.DataGetMethod;
 import dyno.schedule.models.WorkCenterOpAllocModel;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -20,6 +22,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 
@@ -60,6 +63,27 @@ public class WorkCenterOpAllocDataManager
         List<WorkCenterOpAllocModel> workCenterOpAlloc = excelMgr.getExcelData("WorkCenterOpAllocations");
 
         return workCenterOpAlloc;
+    }
+    
+    public void updateWorkCenterOpAllocDetails(String workCenterNo, Date bestOfferedDate, int operationId)
+    {
+        try
+        {
+            List<WorkCenterOpAllocModel> details = new ArrayList<>();
+            WorkCenterOpAllocModel alloc = new WorkCenterOpAllocModel();
+            alloc.setOperationDate(new DateTime(bestOfferedDate).toLocalDate().toDate());
+            alloc.setWorkCenterNo(workCenterNo);
+            alloc.AddToTimeBlockAllocation(getTimeBlockName(new DateTime(bestOfferedDate).toLocalTime()), operationId);
+            details.add(alloc);
+            
+            new ExcelWriter(ExcelManager.EXCEL_FILE).modifyExistingWorkbook("WorkCenterOpAllocations", details);
+        } catch (InvalidFormatException ex)
+        {
+            Logger.getLogger(WorkCenterOpAllocDataManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex)
+        {
+            Logger.getLogger(WorkCenterOpAllocDataManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -188,4 +212,37 @@ public class WorkCenterOpAllocDataManager
         return timeBlockValue;
     }
 
+        public static String getTimeBlockName(LocalTime startTime)
+    {
+        String timeBlockValue = null;
+        String startTimeString = startTime.toString();
+        switch (startTimeString)
+        {
+            case "08:00:00.000":
+                timeBlockValue = "TB1";
+                break;
+            case "09:00:00.000":
+                timeBlockValue = "TB2";
+                break;
+            case "10:00:00.000":
+                timeBlockValue = "TB3";
+                break;
+            case "11:00:00.000":
+                timeBlockValue = "TB4";
+                break;
+            case "13:00:00.000":
+                timeBlockValue = "TB5";
+                break;
+            case "14:00:00.000":
+                timeBlockValue = "TB6";
+                break;
+            case "15:00:00.000":
+                timeBlockValue = "TB7";
+                break;
+            case "16:00:00.000":
+                timeBlockValue = "TB8";
+                break;
+        }
+        return timeBlockValue;
+    }
 }

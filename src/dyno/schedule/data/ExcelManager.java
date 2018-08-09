@@ -221,4 +221,51 @@ public class ExcelManager
         return workCenterOpAllocations;
     }
 
+    public static List<Integer> getTimeBlockIndexesForExcel(List<String> timeBlocks)
+    {
+        List<Integer> indexes = new ArrayList<>();
+        for (String timeBlock : timeBlocks)
+        {
+            int index = -1;
+
+            indexes.add(index);
+        }
+        return indexes;
+    }
+
+    public static int getTimeBlockExcelIndex(String timeBlock)
+    {
+        int index = -1;
+        int startingIndex = 2;
+        switch (timeBlock)
+        {
+            case "TB1":
+                index = startingIndex;
+                break;
+            case "TB2":
+                index = startingIndex + 1;
+                break;
+            case "TB3":
+                index = startingIndex + 2;
+                break;
+            case "TB4":
+                index = startingIndex + 3;
+                break;
+            case "TB5":
+                index = startingIndex + 4;
+                break;
+            case "TB6":
+                index = startingIndex + 5;
+                break;
+            case "TB7":
+                index = startingIndex + 6;
+                break;
+            case "TB8":
+                index = startingIndex + 7;
+                break;
+        }
+
+        return index;
+    }
+
 }

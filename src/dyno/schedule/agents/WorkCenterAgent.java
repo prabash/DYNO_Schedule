@@ -5,6 +5,7 @@
  */
 package dyno.schedule.agents;
 
+import dyno.schedule.data.DataManager;
 import dyno.schedule.data.WorkCenterOpAllocDataManager;
 import dyno.schedule.models.WorkCenterModel;
 import dyno.schedule.utils.DateTimeUtil;
@@ -201,17 +202,18 @@ public class WorkCenterAgent extends Agent
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null)
             {
-                // ACCEPT_PROPOSAL Message received. Process it
-                String title = msg.getContent();
+                // ACCEPT_PROPOSAL Message received with the OperationNo
+                String operationId = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
                 //Integer price = (Integer) catalogue.remove(title);
                 if (bestOfferedDate != null)
                 {
-                    reply.setPerformative(ACLMessage.INFORM);
+                    new WorkCenterOpAllocDataManager(DataManager.getDataMethod()).updateWorkCenterOpAllocDetails(workCenter.getWorkCenterNo(), bestOfferedDate, Integer.valueOf(operationId));
                     //update the excel sheet with the date
-                    System.out.println(title + " sold to agent " + msg.getSender().getName());
+                    System.out.println("WC --> SCHEDULED OPERATION " + Integer.valueOf(operationId) + " ON " + bestOfferedDate);
                 }
+                
                 myAgent.send(reply);
             } else
             {

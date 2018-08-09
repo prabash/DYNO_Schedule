@@ -19,6 +19,11 @@ public class WorkCenterOpAllocModel
     private Date operationDate;
     private HashMap<String, Integer> timeBlockAllocation;
 
+    public WorkCenterOpAllocModel()
+    {
+        timeBlockAllocation = new HashMap<>();
+    }
+    
     /**
      * @return the workCenterNo
      */

@@ -36,6 +36,7 @@ public class ShopOrderAgent extends Agent
 
     // The target date that the operation should be started (FS) or Ended (BS)
     private Date targetOperationDate = null;
+    private int targetOperationID = 0;
     // The list of known workcenter agents
     private AID[] workCenterAgents;
 
@@ -62,6 +63,7 @@ public class ShopOrderAgent extends Agent
                     // if the targetOperationDate is null (initially), set the SO created date as the startdate and concatenate with 8.00AM as the starting time
                     // if the targetOperationDate is available use it as it is (since it will already have the time portion available)
                     targetOperationDate = targetOperationDate == null ? DateTimeUtil.ConcatenateDateTime(shopOrder.getCreatedDate(), DateTimeUtil.getDefaultSimpleTimeFormat().parse("08:00:00")) : targetOperationDate;
+                    targetOperationID = operation.getOperationId();
                 } catch (ParseException ex)
                 {
                     Logger.getLogger(ShopOrderAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -69,10 +71,10 @@ public class ShopOrderAgent extends Agent
                 System.out.println("Target operation date is " + targetOperationDate);
 
                 // Add a TickerBehaviour that schedules a request to seller agents every minute
-                addBehaviour(new TickerBehaviour(this, 5000)
-                {
-                    protected void onTick()
-                    {
+//                addBehaviour(new TickerBehaviour(this, 5000)
+//                {
+//                    protected void onTick()
+//                    {
                         System.out.println("Trying to schedule operation : " + targetOperationDate);
                         
                         // Update the list of seller agents
@@ -87,7 +89,7 @@ public class ShopOrderAgent extends Agent
                         try
                         {
                             // find the agents belonging to the certain work center type
-                            DFAgentDescription[] result = DFService.search(myAgent, template);
+                            DFAgentDescription[] result = DFService.search(this, template);
                             System.out.println("Found the following seller agents:");
                             workCenterAgents = new AID[result.length];
                             for (int i = 0; i < result.length; ++i)
@@ -101,9 +103,9 @@ public class ShopOrderAgent extends Agent
                         }
 
                         // Perform the request
-                        myAgent.addBehaviour(new BWorkCenterRequestHandler(operation));
-                    }
-                });
+                        addBehaviour(new BWorkCenterRequestHandler(operation));
+//                    }
+//                });
             }
 
         } else
@@ -268,7 +270,7 @@ public class ShopOrderAgent extends Agent
                     // Send the confirmation to the work center that sent the best date
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestWorkCenter);
-                    order.setContent(targetOperationDate.toString());
+                    order.setContent(String.valueOf(targetOperationID));
                     order.setConversationId(converstaionId);
                     order.setReplyWith("setOperation" + System.currentTimeMillis());
                     myAgent.send(order);
